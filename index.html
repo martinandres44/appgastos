@@ -2,157 +2,176 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Gastos Familiares PRO</title>
-    
     <link rel="apple-touch-icon" href="icon.png">
-    
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #1e293b; --success: #059669; --bg: #f8fafc; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 15px; }
-        .app-card { max-width: 420px; margin: auto; background: white; border-radius: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
-        .header { background: var(--primary); color: white; padding: 25px; text-align: center; }
-        .form { padding: 25px; }
-        label { display: block; margin-top: 18px; font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; }
-        input, select { width: 100%; padding: 14px; margin-top: 6px; border: 1.5px solid #e2e8f0; border-radius: 12px; box-sizing: border-box; font-size: 1rem; outline: none; }
-        .btn-save { width: 100%; background: var(--success); color: white; border: none; padding: 18px; border-radius: 16px; font-size: 1.1rem; font-weight: 600; margin-top: 30px; cursor: pointer; }
-        #status { margin-top: 15px; text-align: center; font-size: 0.95rem; font-weight: 600; }
-        .new-cat-input { display: none; margin-top: 10px; background-color: #f0f9ff; border-color: #7dd3fc; }
+        :root { 
+            --primary: #1e293b; --success: #059669; --bg: #f8fafc; --card-bg: #ffffff; 
+            --text-main: #1e293b; --text-sec: #64748b; --border: #e2e8f0;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #38bdf8; --success: #10b981; --bg: #0f172a; --card-bg: #1e293b;
+                --text-main: #f1f5f9; --text-sec: #94a3b8; --border: #334155;
+            }
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text-main); }
+        .app-card { max-width: 420px; margin: auto; background: var(--card-bg); border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid var(--border); overflow: hidden; }
+        .tabs { display: flex; background: var(--border); gap: 1px; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-sec); background: var(--bg); }
+        .tab.active { background: var(--card-bg); color: var(--text-main); }
+        .content { padding: 20px; display: none; }
+        .content.active { display: block; }
+        label { display: block; margin-top: 15px; font-size: 0.7rem; font-weight: 700; color: var(--text-sec); text-transform: uppercase; }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; background: var(--card-bg); color: var(--text-main); box-sizing: border-box; -webkit-appearance: none; }
+        .btn-save { width: 100%; background: var(--success); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 600; margin-top: 25px; cursor: pointer; }
+        .total-box { background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 16px; text-align: center; margin-bottom: 20px; color: var(--success); border: 1px solid var(--success); }
+        .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .filter-full { grid-column: span 2; }
+        .detail-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        .detail-meta { font-size: 0.7rem; color: var(--text-sec); display: flex; justify-content: space-between; margin-top: 4px; }
+        .btn-ws { width: 100%; background: #25d366; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; margin-top: 15px; cursor: pointer; }
     </style>
 </head>
-<body onload="cargarCategorias()">
+<body>
 
 <div class="app-card">
-    <div class="header">
-        <h2 style="margin:0; font-size: 1.5rem;">💸 Gastos Familia</h2>
-        <p style="margin:5px 0 0 0; opacity: 0.7; font-size: 0.85rem;">Martín, Flor, Pili, Tomy, Bauti</p>
+    <div class="tabs">
+        <div id="tab-form" class="tab active" onclick="switchTab('form')">📝 Cargar</div>
+        <div id="tab-report" class="tab" onclick="switchTab('report')">📊 Reporte</div>
     </div>
 
-    <div class="form">
+    <div id="form-sec" class="content active">
         <label>📅 Fecha</label>
         <input type="date" id="date">
-
-        <label>👤 ¿Quién gasta?</label>
-        <select id="user">
-            <option value="Martín">Martín</option>
-            <option value="Flor">Flor</option>
-            <option value="Pili">Pili</option>
-            <option value="Tomy">Tomy</option>
-            <option value="Bauti">Bauti</option>
-        </select>
-        
+        <label>👤 ¿Quién?</label>
+        <select id="user"><option>Martín</option><option>Flor</option><option>Pili</option><option>Tomy</option><option>Bauti</option></select>
         <label>💰 Monto ($)</label>
-        <input type="number" id="amount" placeholder="0.00" inputmode="decimal">
-
+        <input type="text" id="amount" placeholder="0" inputmode="numeric" oninput="formatThousands(this)">
         <label>📂 Categoría</label>
-        <select id="category" onchange="toggleNuevaCat(this.value)">
-            <option value="">Cargando orden...</option>
-        </select>
-        <input type="text" id="customCategory" class="new-cat-input" placeholder="Nombre de la nueva categoría">
-
+        <select id="category" onchange="toggleNueva(this.value)"></select>
+        <input type="text" id="customCat" style="display:none; margin-top:10px;" placeholder="¿Cuál es?">
         <label>📝 Detalle</label>
         <input type="text" id="desc" placeholder="Ej: Supermercado">
-
-        <label>💳 Tarjeta / Medio</label>
-        <select id="card">
-            <option value="Visa">💳 Visa</option>
-            <option value="Mastercard">🔴 Mastercard</option>
-            <option value="Amex">🟩 American Express</option>
-            <option value="Debito">🏦 Tarjeta de Débito</option>
-            <option value="Transferencia">↔️ Transferencia</option>
-            <option value="Efectivo">💵 Efectivo</option>
-            <option value="Dinero en Cuenta">💲 Dinero en cuenta</option>
-        </select>
-
-        <label>🏦 Banco / Plataforma</label>
-        <select id="bank">
-            <option value="Galicia">🟠 Galicia</option>
-            <option value="BBVA">🟦 BBVA</option>
-            <option value="ICBC">🟥 ICBC</option>
-            <option value="BNA">🏛️ Banco Nación</option>
-            <option value="Mercado Pago">🔵 Mercado Pago</option>
-            <option value="Efectivo">💵 Efectivo</option>
-        </select>
-
+        <label>💳 Medio de Pago</label>
+        <select id="card"><option>💳 Visa</option><option>🔴 Mastercard</option><option>🟩 Amex</option><option>🏦 Débito</option><option>↔️ Transferencia</option><option>💵 Efectivo</option><option>💲 Dinero en cuenta</option></select>
+        <label>🏦 Banco</label>
+        <select id="bank"><option>🟠 Galicia</option><option>🟦 BBVA</option><option>🟥 ICBC</option><option>🏛️ BNA</option><option>🔵 Mercado Pago</option><option>💵 Efectivo</option></select>
         <button class="btn-save" id="btn" onclick="saveData()">Guardar Gasto</button>
-        <div id="status"></div>
+        <div id="status" style="text-align:center; margin-top:15px;"></div>
+    </div>
+
+    <div id="report-sec" class="content">
+        <div class="total-box"><small>TOTAL FILTRADO</small><h2 id="total-general">$0</h2></div>
+        <div class="filter-grid">
+            <div class="filter-full"><label>Persona</label><select id="filter-user" onchange="aplicarFiltros()"><option value="Todos">Todos</option><option>Martín</option><option>Flor</option><option>Pili</option><option>Tomy</option><option>Bauti</option></select></div>
+            <div><label>Mes</label><select id="filter-month" onchange="aplicarFiltros()"><option value="Todos">Todos</option></select></div>
+            <div><label>Categoría</label><select id="filter-cat" onchange="aplicarFiltros()"><option value="Todas">Todas</option></select></div>
+        </div>
+        <label>🔍 Buscar</label>
+        <input type="text" id="search-box" placeholder="Buscar..." oninput="aplicarFiltros()">
+        <button class="btn-ws" onclick="compartirWhatsApp()">📲 Compartir Resumen</button>
+        <div id="lista-detalle" style="margin-top:20px;"></div>
     </div>
 </div>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydjYL0AjyQuPBW3fyYcAJduB20amWvY_OhYNJKa8SzdCJK53RV--lhAuTJ9BzF7F0P4w/exec";
+    let todosLosGastos = [];
 
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+    // INICIO FORZADO
+    window.addEventListener('load', () => {
+        const hoy = new Date();
+        const y = hoy.getFullYear();
+        const m = String(hoy.getMonth() + 1).padStart(2, '0');
+        const d = String(hoy.getDate()).padStart(2, '0');
+        document.getElementById('date').value = `${y}-${m}-${d}`;
+        cargarCategorias();
+    });
+
+    function formatThousands(input) {
+        let v = input.value.replace(/\D/g, "");
+        input.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function switchTab(t) {
+        document.getElementById('form-sec').style.display = (t === 'form') ? 'block' : 'none';
+        document.getElementById('report-sec').style.display = (t === 'report') ? 'block' : 'none';
+        document.getElementById('tab-form').classList.toggle('active', t === 'form');
+        document.getElementById('tab-report').classList.toggle('active', t === 'report');
+        if(t === 'report') cargarDatosReporte();
+    }
 
     async function cargarCategorias() {
-        const select = document.getElementById('category');
         try {
-            const response = await fetch(SCRIPT_URL + "?action=getCategories");
-            const categorias = await response.json();
-            select.innerHTML = '';
-            if (categorias.length === 0) {
-                insertarCategoriasDefault(select);
-            } else {
-                categorias.forEach(cat => {
-                    let opt = document.createElement('option');
-                    opt.value = opt.innerHTML = cat;
-                    select.appendChild(opt);
-                });
-            }
-            let optNueva = document.createElement('option');
-            optNueva.value = "Nueva"; optNueva.innerHTML = "➕ Agregar nueva...";
-            select.appendChild(optNueva);
-        } catch (e) {
-            insertarCategoriasDefault(select);
-        }
+            const res = await fetch(SCRIPT_URL + "?action=getCategories");
+            const cats = await res.json();
+            const html = cats.map(c => `<option value="${c}">${c}</option>`).join('');
+            document.getElementById('category').innerHTML = html + '<option value="Nueva">➕ Nueva...</option>';
+            document.getElementById('filter-cat').innerHTML = '<option value="Todas">Todas</option>' + html;
+        } catch (e) { console.error("Error cats"); }
     }
 
-    function insertarCategoriasDefault(selectElement) {
-        const defaults = ["🛒 Supermercado", "🏢 Expensas", "📚 Educación", "🚗 Transporte", "💡 Servicios", "🏥 Salud", "🍴 Salidas / Restaurant", "✨ Otros"];
-        defaults.forEach(cat => {
-            let opt = document.createElement('option');
-            opt.value = opt.innerHTML = cat;
-            selectElement.appendChild(opt);
+    async function cargarDatosReporte() {
+        const list = document.getElementById('lista-detalle');
+        list.innerHTML = "⏳ Actualizando...";
+        try {
+            const res = await fetch(SCRIPT_URL + "?action=getReport");
+            todosLosGastos = await res.json();
+            const meses = [...new Set(todosLosGastos.map(g => g.mes))];
+            document.getElementById('filter-month').innerHTML = '<option value="Todos">Todos</option>' + meses.map(m => `<option value="${m}">${m}</option>`).join('');
+            aplicarFiltros();
+        } catch (e) { list.innerHTML = "Error de conexión."; }
+    }
+
+    function aplicarFiltros() {
+        const u = document.getElementById('filter-user').value;
+        const m = document.getElementById('filter-month').value;
+        const c = document.getElementById('filter-cat').value;
+        const s = document.getElementById('search-box').value.toLowerCase();
+        
+        const f = todosLosGastos.filter(g => {
+            return (u === "Todos" || g.usuario === u) && (m === "Todos" || g.mes === m) && (c === "Todas" || g.categoria === c) && (g.detalle.toLowerCase().includes(s));
         });
+
+        document.getElementById('total-general').innerText = "$" + f.reduce((a, b) => a + b.monto, 0).toLocaleString('es-AR');
+        document.getElementById('lista-detalle').innerHTML = f.reverse().map(g => `
+            <div class="detail-item">
+                <div style="display:flex; justify-content:space-between"><span><b>${g.usuario}</b>: ${g.detalle}</span><b>$${g.monto.toLocaleString('es-AR')}</b></div>
+                <div class="detail-meta"><span>${g.categoria}</span><span>${g.mes}</span></div>
+            </div>
+        `).join('') || '<p style="text-align:center;">Sin resultados.</p>';
     }
 
-    function toggleNuevaCat(valor) {
-        document.getElementById('customCategory').style.display = (valor === 'Nueva') ? 'block' : 'none';
+    function compartirWhatsApp() {
+        const t = document.getElementById('total-general').innerText;
+        const u = document.getElementById('filter-user').value;
+        window.open(`https://wa.me/?text=${encodeURIComponent(`📊 *Gastos Familia*\nPersona: *${u}*\nTOTAL: *${t}*`)}`);
     }
+
+    function toggleNueva(v) { document.getElementById('customCat').style.display = (v === 'Nueva' ? 'block' : 'none'); }
 
     async function saveData() {
         const btn = document.getElementById('btn');
-        const status = document.getElementById('status');
-        let catFinal = document.getElementById('category').value;
-        let esNueva = (catFinal === 'Nueva');
-        if(esNueva) catFinal = "🏷️ " + document.getElementById('customCategory').value;
-
-        const payload = {
-            fechaCarga: document.getElementById('date').value,
-            usuario: document.getElementById('user').value,
-            monto: document.getElementById('amount').value,
-            categoria: catFinal,
-            desc: document.getElementById('desc').value,
-            banco: document.getElementById('bank').value,
-            tarjeta: document.getElementById('card').value,
-            nuevaCategoria: esNueva
-        };
-
-        if(!payload.monto || !payload.desc || catFinal === "") return alert("Faltan datos");
+        let cat = document.getElementById('category').value;
+        if(cat === 'Nueva') cat = "🏷️ " + document.getElementById('customCat').value;
+        const monto = document.getElementById('amount').value.replace(/\./g, "");
+        if(!monto || !document.getElementById('desc').value) return alert("Faltan datos");
 
         btn.disabled = true; btn.innerText = "Guardando...";
         try {
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-            status.innerHTML = "<span style='color:var(--success)'>✅ ¡Guardado con éxito!</span>";
-            document.getElementById('amount').value = "";
-            document.getElementById('desc').value = "";
-            if(esNueva) await cargarCategorias();
-        } catch (error) {
-            status.innerHTML = "<span style='color:#dc2626'>❌ Error</span>";
-        } finally {
-            btn.disabled = false; btn.innerText = "Guardar Gasto";
-        }
+            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
+                fechaCarga: document.getElementById('date').value, usuario: document.getElementById('user').value,
+                monto: monto, categoria: cat, desc: document.getElementById('desc').value,
+                banco: document.getElementById('bank').value, tarjeta: document.getElementById('card').value, nuevaCategoria: (cat.includes("🏷️"))
+            })});
+            document.getElementById('status').innerHTML = "✅ Guardado";
+            document.getElementById('amount').value = ""; document.getElementById('desc').value = "";
+            setTimeout(() => document.getElementById('status').innerHTML = "", 3000);
+        } catch (e) { alert("Error"); }
+        btn.disabled = false; btn.innerText = "Guardar Gasto";
     }
 </script>
 </body>
