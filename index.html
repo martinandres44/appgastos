@@ -11,33 +11,51 @@
             --primary: #1e293b; --success: #059669; --bg: #f8fafc; --card-bg: #ffffff; 
             --text-main: #1e293b; --text-sec: #64748b; --border: #e2e8f0;
         }
+
         @media (prefers-color-scheme: dark) {
             :root {
                 --primary: #38bdf8; --success: #10b981; --bg: #0f172a; --card-bg: #1e293b;
                 --text-main: #f1f5f9; --text-sec: #94a3b8; --border: #334155;
             }
         }
+
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text-main); }
-        .app-card { max-width: 420px; margin: auto; background: var(--card-bg); border-radius: 24px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border: 1px solid var(--border); overflow: hidden; }
+        .app-card { max-width: 420px; margin: auto; background: var(--card-bg); border-radius: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); overflow: hidden; }
+        
+        /* ENCABEZADO CON COLOR QUE TE GUSTABA */
+        .header { background: #1e293b; color: white; padding: 25px; text-align: center; }
+        @media (prefers-color-scheme: dark) { .header { background: #0f172a; } }
+
         .tabs { display: flex; background: var(--border); gap: 1px; }
         .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; font-weight: 600; color: var(--text-sec); background: var(--bg); }
         .tab.active { background: var(--card-bg); color: var(--text-main); }
+        
         .content { padding: 20px; display: none; }
         .content.active { display: block; }
+
         label { display: block; margin-top: 15px; font-size: 0.7rem; font-weight: 700; color: var(--text-sec); text-transform: uppercase; }
-        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; background: var(--card-bg); color: var(--text-main); box-sizing: border-box; -webkit-appearance: none; }
-        .btn-save { width: 100%; background: var(--success); color: white; border: none; padding: 16px; border-radius: 16px; font-size: 1.1rem; font-weight: 600; margin-top: 25px; cursor: pointer; }
-        .total-box { background: rgba(16, 185, 129, 0.1); padding: 15px; border-radius: 16px; text-align: center; margin-bottom: 20px; color: var(--success); border: 1px solid var(--success); }
+        input, select { width: 100%; padding: 12px; margin-top: 5px; border: 1.5px solid var(--border); border-radius: 12px; font-size: 1rem; outline: none; background: var(--card-bg); color: var(--text-main); box-sizing: border-box; }
+        
+        .btn-save { width: 100%; background: var(--success); color: white; border: none; padding: 18px; border-radius: 16px; font-size: 1.1rem; font-weight: 600; margin-top: 25px; cursor: pointer; }
+        .total-box { background: rgba(5, 150, 105, 0.1); padding: 15px; border-radius: 16px; text-align: center; margin-bottom: 20px; color: var(--success); border: 1px solid var(--success); }
+        
         .filter-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
         .filter-full { grid-column: span 2; }
+        
         .detail-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
         .detail-meta { font-size: 0.7rem; color: var(--text-sec); display: flex; justify-content: space-between; margin-top: 4px; }
+        
         .btn-ws { width: 100%; background: #25d366; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; margin-top: 15px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="app-card">
+    <div class="header">
+        <h2 style="margin:0; font-size: 1.4rem;">💸 Gastos Familia</h2>
+        <p style="margin:5px 0 0 0; opacity: 0.7; font-size: 0.8rem;">Martín, Flor, Pili, Tomy, Bauti</p>
+    </div>
+
     <div class="tabs">
         <div id="tab-form" class="tab active" onclick="switchTab('form')">📝 Cargar</div>
         <div id="tab-report" class="tab" onclick="switchTab('report')">📊 Reporte</div>
@@ -46,34 +64,69 @@
     <div id="form-sec" class="content active">
         <label>📅 Fecha</label>
         <input type="date" id="date">
-        <label>👤 ¿Quién?</label>
-        <select id="user"><option>Martín</option><option>Flor</option><option>Pili</option><option>Tomy</option><option>Bauti</option></select>
+        
+        <label>👤 ¿Quién gasta?</label>
+        <select id="user">
+            <option>Martín</option><option>Flor</option><option>Pili</option><option>Tomy</option><option>Bauti</option>
+        </select>
+        
         <label>💰 Monto ($)</label>
         <input type="text" id="amount" placeholder="0" inputmode="numeric" oninput="formatThousands(this)">
+        
         <label>📂 Categoría</label>
         <select id="category" onchange="toggleNueva(this.value)"></select>
-        <input type="text" id="customCat" style="display:none; margin-top:10px;" placeholder="¿Cuál es?">
+        <input type="text" id="customCat" style="display:none; margin-top:10px;" placeholder="¿Cuál es la nueva?">
+        
         <label>📝 Detalle</label>
         <input type="text" id="desc" placeholder="Ej: Supermercado">
+        
         <label>💳 Medio de Pago</label>
-        <select id="card"><option>💳 Visa</option><option>🔴 Mastercard</option><option>🟩 Amex</option><option>🏦 Débito</option><option>↔️ Transferencia</option><option>💵 Efectivo</option><option>💲 Dinero en cuenta</option></select>
-        <label>🏦 Banco</label>
-        <select id="bank"><option>🟠 Galicia</option><option>🟦 BBVA</option><option>🟥 ICBC</option><option>🏛️ BNA</option><option>🔵 Mercado Pago</option><option>💵 Efectivo</option></select>
+        <select id="card">
+            <option>💳 Visa</option><option>🔴 Mastercard</option><option>🟩 Amex</option>
+            <option>🏦 Débito</option><option>↔️ Transferencia</option><option>💵 Efectivo</option>
+            <option>💲 Dinero en cuenta</option>
+        </select>
+        
+        <label>🏦 Banco / Plataforma</label>
+        <select id="bank">
+            <option>🟠 Galicia</option><option>🟦 BBVA</option><option>🟥 ICBC</option>
+            <option>🏛️ BNA</option><option>🔵 Mercado Pago</option><option>💵 Efectivo</option>
+        </select>
+        
         <button class="btn-save" id="btn" onclick="saveData()">Guardar Gasto</button>
         <div id="status" style="text-align:center; margin-top:15px;"></div>
     </div>
 
     <div id="report-sec" class="content">
-        <div class="total-box"><small>TOTAL FILTRADO</small><h2 id="total-general">$0</h2></div>
-        <div class="filter-grid">
-            <div class="filter-full"><label>Persona</label><select id="filter-user" onchange="aplicarFiltros()"><option value="Todos">Todos</option><option>Martín</option><option>Flor</option><option>Pili</option><option>Tomy</option><option>Bauti</option></select></div>
-            <div><label>Mes</label><select id="filter-month" onchange="aplicarFiltros()"><option value="Todos">Todos</option></select></div>
-            <div><label>Categoría</label><select id="filter-cat" onchange="aplicarFiltros()"><option value="Todas">Todas</option></select></div>
+        <div class="total-box">
+            <small style="font-weight:700">TOTAL FILTRADO</small>
+            <h2 id="total-general" style="margin:5px 0;">$0</h2>
         </div>
-        <label>🔍 Buscar</label>
-        <input type="text" id="search-box" placeholder="Buscar..." oninput="aplicarFiltros()">
+
+        <div class="filter-grid">
+            <div class="filter-full">
+                <label>Persona</label>
+                <select id="filter-user" onchange="aplicarFiltros()">
+                    <option value="Todos">Todos</option><option>Martín</option><option>Flor</option><option>Pili</option><option>Tomy</option><option>Bauti</option>
+                </select>
+            </div>
+            <div>
+                <label>Mes</label>
+                <select id="filter-month" onchange="aplicarFiltros()"><option value="Todos">Todos</option></select>
+            </div>
+            <div>
+                <label>Categoría</label>
+                <select id="filter-cat" onchange="aplicarFiltros()"><option value="Todas">Todas</option></select>
+            </div>
+        </div>
+
+        <label>🔍 Buscar detalle</label>
+        <input type="text" id="search-box" placeholder="Ej: Coto, Nafta..." oninput="aplicarFiltros()">
+
         <button class="btn-ws" onclick="compartirWhatsApp()">📲 Compartir Resumen</button>
-        <div id="lista-detalle" style="margin-top:20px;"></div>
+
+        <label style="margin-top:20px;">Detalle de Gastos</label>
+        <div id="lista-detalle" style="margin-top:10px; border-top: 1px solid var(--border);"></div>
     </div>
 </div>
 
@@ -81,7 +134,6 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbydjYL0AjyQuPBW3fyYcAJduB20amWvY_OhYNJKa8SzdCJK53RV--lhAuTJ9BzF7F0P4w/exec";
     let todosLosGastos = [];
 
-    // INICIO FORZADO
     window.addEventListener('load', () => {
         const hoy = new Date();
         const y = hoy.getFullYear();
@@ -148,7 +200,8 @@
     function compartirWhatsApp() {
         const t = document.getElementById('total-general').innerText;
         const u = document.getElementById('filter-user').value;
-        window.open(`https://wa.me/?text=${encodeURIComponent(`📊 *Gastos Familia*\nPersona: *${u}*\nTOTAL: *${t}*`)}`);
+        const m = document.getElementById('filter-month').value;
+        window.open(`https://wa.me/?text=${encodeURIComponent(`📊 *Gastos Familia*\n👤 Persona: *${u}*\n📅 Mes: *${m}*\n💰 TOTAL: *${t}*`)}`);
     }
 
     function toggleNueva(v) { document.getElementById('customCat').style.display = (v === 'Nueva' ? 'block' : 'none'); }
@@ -167,7 +220,7 @@
                 monto: monto, categoria: cat, desc: document.getElementById('desc').value,
                 banco: document.getElementById('bank').value, tarjeta: document.getElementById('card').value, nuevaCategoria: (cat.includes("🏷️"))
             })});
-            document.getElementById('status').innerHTML = "✅ Guardado";
+            document.getElementById('status').innerHTML = "<span style='color:var(--success)'>✅ ¡Gasto cargado!</span>";
             document.getElementById('amount').value = ""; document.getElementById('desc').value = "";
             setTimeout(() => document.getElementById('status').innerHTML = "", 3000);
         } catch (e) { alert("Error"); }
