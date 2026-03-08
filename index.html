@@ -22,7 +22,6 @@
         body { font-family: 'Inter', sans-serif; background-color: var(--bg); margin: 0; padding: 10px; color: var(--text-main); }
         .app-card { max-width: 420px; margin: auto; background: var(--card-bg); border-radius: 28px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); border: 1px solid var(--border); overflow: hidden; }
         
-        /* ENCABEZADO CON COLOR QUE TE GUSTABA */
         .header { background: #1e293b; color: white; padding: 25px; text-align: center; }
         @media (prefers-color-scheme: dark) { .header { background: #0f172a; } }
 
@@ -44,6 +43,9 @@
         
         .detail-item { padding: 12px; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
         .detail-meta { font-size: 0.7rem; color: var(--text-sec); display: flex; justify-content: space-between; margin-top: 4px; }
+        .fuente-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 6px; font-weight: 600; }
+        .fuente-telegram { background: #e0f2fe; color: #0369a1; }
+        .fuente-app { background: #f0fdf4; color: #15803d; }
         
         .btn-ws { width: 100%; background: #25d366; color: white; border: none; padding: 12px; border-radius: 12px; font-weight: 600; margin-top: 15px; cursor: pointer; }
     </style>
@@ -163,7 +165,7 @@
             const html = cats.map(c => `<option value="${c}">${c}</option>`).join('');
             document.getElementById('category').innerHTML = html + '<option value="Nueva">➕ Nueva...</option>';
             document.getElementById('filter-cat').innerHTML = '<option value="Todas">Todas</option>' + html;
-        } catch (e) { console.error("Error cats"); }
+        } catch (e) { console.error("Error cats:", e); }
     }
 
     async function cargarDatosReporte() {
@@ -175,7 +177,7 @@
             const meses = [...new Set(todosLosGastos.map(g => g.mes))];
             document.getElementById('filter-month').innerHTML = '<option value="Todos">Todos</option>' + meses.map(m => `<option value="${m}">${m}</option>`).join('');
             aplicarFiltros();
-        } catch (e) { list.innerHTML = "Error de conexión."; }
+        } catch (e) { list.innerHTML = "❌ Error de conexión. Revisá que el script esté publicado."; }
     }
 
     function aplicarFiltros() {
@@ -185,16 +187,31 @@
         const s = document.getElementById('search-box').value.toLowerCase();
         
         const f = todosLosGastos.filter(g => {
-            return (u === "Todos" || g.usuario === u) && (m === "Todos" || g.mes === m) && (c === "Todas" || g.categoria === c) && (g.detalle.toLowerCase().includes(s));
+            return (u === "Todos" || g.usuario === u) &&
+                   (m === "Todos" || g.mes === m) &&
+                   (c === "Todas" || g.categoria === c) &&
+                   (g.detalle.toLowerCase().includes(s));
         });
 
         document.getElementById('total-general').innerText = "$" + f.reduce((a, b) => a + b.monto, 0).toLocaleString('es-AR');
-        document.getElementById('lista-detalle').innerHTML = f.reverse().map(g => `
+        document.getElementById('lista-detalle').innerHTML = f.reverse().map(g => {
+            const badgeClass = g.fuente === 'Telegram' ? 'fuente-telegram' : 'fuente-app';
+            const badgeIcon = g.fuente === 'Telegram' ? '✈️ Telegram' : '📱 App';
+            return `
             <div class="detail-item">
-                <div style="display:flex; justify-content:space-between"><span><b>${g.usuario}</b>: ${g.detalle}</span><b>$${g.monto.toLocaleString('es-AR')}</b></div>
-                <div class="detail-meta"><span>${g.categoria}</span><span>${g.mes}</span></div>
-            </div>
-        `).join('') || '<p style="text-align:center;">Sin resultados.</p>';
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span><b>${g.usuario}</b>: ${g.detalle}</span>
+                    <b>$${g.monto.toLocaleString('es-AR')}</b>
+                </div>
+                <div class="detail-meta">
+                    <span>${g.categoria}</span>
+                    <span style="display:flex; gap:6px; align-items:center;">
+                        <span class="fuente-badge ${badgeClass}">${badgeIcon}</span>
+                        ${g.mes}
+                    </span>
+                </div>
+            </div>`;
+        }).join('') || '<p style="text-align:center; color:var(--text-sec);">Sin resultados.</p>';
     }
 
     function compartirWhatsApp() {
@@ -208,25 +225,42 @@
 
     async function saveData() {
         const btn = document.getElementById('btn');
+        const status = document.getElementById('status');
         let cat = document.getElementById('category').value;
         if(cat === 'Nueva') cat = "🏷️ " + document.getElementById('customCat').value;
         const monto = document.getElementById('amount').value.replace(/\./g, "");
-        if(!monto || !document.getElementById('desc').value) return alert("Faltan datos");
+        if(!monto || !document.getElementById('desc').value) return alert("Completá el monto y el detalle");
 
-        btn.disabled = true; btn.innerText = "Guardando...";
+        btn.disabled = true;
+        btn.innerText = "Guardando...";
+        status.innerHTML = "";
+
         try {
-            await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify({
-                fechaCarga: document.getElementById('date').value, usuario: document.getElementById('user').value,
-                monto: monto, categoria: cat, desc: document.getElementById('desc').value,
-                banco: document.getElementById('bank').value, tarjeta: document.getElementById('card').value, nuevaCategoria: (cat.includes("🏷️"))
-            })});
-            document.getElementById('status').innerHTML = "<span style='color:var(--success)'>✅ ¡Gasto cargado!</span>";
-            document.getElementById('amount').value = ""; document.getElementById('desc').value = "";
-            setTimeout(() => document.getElementById('status').innerHTML = "", 3000);
-        } catch (e) { alert("Error"); }
-        btn.disabled = false; btn.innerText = "Guardar Gasto";
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fechaCarga: document.getElementById('date').value,
+                    usuario: document.getElementById('user').value,
+                    monto: monto,
+                    categoria: cat,
+                    desc: document.getElementById('desc').value,
+                    banco: document.getElementById('bank').value,
+                    tarjeta: document.getElementById('card').value,
+                    nuevaCategoria: cat.includes("🏷️")
+                })
+            });
+            status.innerHTML = "<span style='color:var(--success)'>✅ ¡Gasto cargado!</span>";
+            document.getElementById('amount').value = "";
+            document.getElementById('desc').value = "";
+            setTimeout(() => status.innerHTML = "", 3000);
+        } catch (e) {
+            status.innerHTML = "<span style='color:red'>❌ Error al guardar. Revisá la conexión.</span>";
+        }
+        btn.disabled = false;
+        btn.innerText = "Guardar Gasto";
     }
 </script>
 </body>
-
 </html>
