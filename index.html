@@ -195,8 +195,8 @@
 
         document.getElementById('total-general').innerText = "$" + f.reduce((a, b) => a + b.monto, 0).toLocaleString('es-AR');
         document.getElementById('lista-detalle').innerHTML = f.reverse().map(g => {
-            const badgeClass = g.fuente === 'Telegram' ? 'fuente-telegram' : 'fuente-app';
-            const badgeIcon = g.fuente === 'Telegram' ? '✈️ Telegram' : '📱 App';
+            const badgeClass = g.origen === 'Telegram' ? 'fuente-telegram' : 'fuente-app';
+            const badgeIcon = g.origen === 'Telegram' ? '✈️ Telegram' : '📱 App';
             return `
             <div class="detail-item">
                 <div style="display:flex; justify-content:space-between; align-items:center;">
